@@ -8,6 +8,7 @@ import { db, schema } from '../../db/index.js'
 import { eq } from 'drizzle-orm'
 import { now } from '../../utils/response.js'
 import { logTaskProgress, logTaskSuccess } from '../../utils/task-logger.js'
+import type { AgentLanguage } from '../index.js'
 
 function syncStoryboardCharacters(storyboardId: number, characterIds: number[]) {
   db.delete(schema.storyboardCharacters)
@@ -41,21 +42,25 @@ function getEpisodeCharacterIds(episodeId: number) {
   )
 }
 
-function validateStoryboardBindings(episodeId: number, sceneId: number | null | undefined, characterIds: number[] | undefined) {
+function validateStoryboardBindings(episodeId: number, sceneId: number | null | undefined, characterIds: number[] | undefined, language: AgentLanguage = 'zh') {
   const episodeSceneIds = getEpisodeSceneIds(episodeId)
   const episodeCharacterIds = getEpisodeCharacterIds(episodeId)
 
   if (sceneId != null && !episodeSceneIds.has(sceneId)) {
-    throw new Error(`scene_id ${sceneId} 不属于当前集`)
+    throw new Error(language === 'en'
+      ? `scene_id ${sceneId} does not belong to the current episode`
+      : `scene_id ${sceneId} 不属于当前集`)
   }
 
   const invalidCharacterIds = (characterIds || []).filter(id => !episodeCharacterIds.has(id))
   if (invalidCharacterIds.length) {
-    throw new Error(`character_ids 不属于当前集: ${invalidCharacterIds.join(', ')}`)
+    throw new Error(language === 'en'
+      ? `character_ids not in current episode: ${invalidCharacterIds.join(', ')}`
+      : `character_ids 不属于当前集: ${invalidCharacterIds.join(', ')}`)
   }
 }
 
-export function createStoryboardTools(episodeId: number, dramaId: number) {
+export function createStoryboardTools(episodeId: number, dramaId: number, language: AgentLanguage = 'zh') {
   const readStoryboardContext = createTool({
     id: 'read_storyboard_context',
     description: 'Read the screenplay, characters, and scenes for storyboard breakdown.',
@@ -191,7 +196,7 @@ export function createStoryboardTools(episodeId: number, dramaId: number) {
 
       let totalDuration = 0
       for (const sb of storyboards) {
-        validateStoryboardBindings(episodeId, sb.scene_id, sb.character_ids)
+        validateStoryboardBindings(episodeId, sb.scene_id, sb.character_ids, language)
         const res = db.insert(schema.storyboards).values({
           episodeId,
           storyboardNumber: sb.shot_number,
@@ -264,6 +269,7 @@ export function createStoryboardTools(episodeId: number, dramaId: number) {
           : db.select().from(schema.storyboardCharacters)
               .where(eq(schema.storyboardCharacters.storyboardId, storyboard_id)).all()
               .map(link => link.characterId),
+        language,
       )
 
       const updates: Record<string, any> = { updatedAt: now() }

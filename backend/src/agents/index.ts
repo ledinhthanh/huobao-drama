@@ -16,6 +16,27 @@ import { createVoiceTools } from './tools/voice-tools.js'
 import { createGridPromptTools } from './tools/grid-prompt-tools.js'
 import { loadAgentSkills } from './skills.js'
 
+export type AgentLanguage = 'en' | 'zh'
+
+// Runtime language directive appended after the canonical Chinese instructions.
+// We don't rewrite the hand-tuned Chinese prompts — instead we tell the LLM at
+// the end of its system prompt to switch output language. This preserves prompt
+// quality while letting English users get English responses.
+const LANG_DIRECTIVES: Record<AgentLanguage, string> = {
+  en: [
+    '## Output Language',
+    'You MUST respond entirely in English. All user-facing text, tool-returned messages,',
+    'error strings, and content stored in the database must be written in English.',
+    'Keep the technical semantics, structure, and format identical to the original',
+    'Chinese instructions; only the natural language changes.',
+  ].join(' '),
+  zh: '',
+}
+
+function languageDirective(lang: AgentLanguage): string {
+  return LANG_DIRECTIVES[lang] || ''
+}
+
 // Default prompts (used when DB has no config)
 const DEFAULT_PROMPTS: Record<string, { name: string; instructions: string }> = {
   script_rewriter: {
@@ -192,26 +213,26 @@ function getModel(dbConfig: any) {
   return provider.chat(modelName)
 }
 
-export function createAgent(type: string, episodeId: number, dramaId: number): Agent | null {
+export function createAgent(type: string, episodeId: number, dramaId: number, language: AgentLanguage = 'zh'): Agent | null {
   const defaults = DEFAULT_PROMPTS[type]
   if (!defaults) return null
 
   const dbConfig = getAgentConfig(type)
   const model = getModel(dbConfig)
   const baseInstructions = dbConfig?.systemPrompt?.trim() || defaults.instructions
-  const skillInstructions = loadAgentSkills(type)
-  const instructions = skillInstructions
-    ? [baseInstructions, '', skillInstructions].join('\n')
-    : baseInstructions
+  const skillInstructions = loadAgentSkills(type, language)
+  const langDirective = languageDirective(language)
+  const parts = [baseInstructions, skillInstructions, langDirective].filter(Boolean)
+  const instructions = parts.join('\n\n')
   const name = dbConfig?.name || defaults.name
 
   let tools: Record<string, any> = {}
   switch (type) {
-    case 'script_rewriter': tools = createScriptTools(episodeId); break
+    case 'script_rewriter': tools = createScriptTools(episodeId, language); break
     case 'extractor': tools = createExtractTools(episodeId, dramaId); break
-    case 'storyboard_breaker': tools = createStoryboardTools(episodeId, dramaId); break
+    case 'storyboard_breaker': tools = createStoryboardTools(episodeId, dramaId, language); break
     case 'voice_assigner': tools = createVoiceTools(episodeId, dramaId); break
-    case 'grid_prompt_generator': tools = createGridPromptTools(episodeId, dramaId); break
+    case 'grid_prompt_generator': tools = createGridPromptTools(episodeId, dramaId, language); break
     default: return null
   }
 

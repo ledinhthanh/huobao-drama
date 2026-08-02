@@ -7,8 +7,9 @@ import { z } from 'zod'
 import { db, schema } from '../../db/index.js'
 import { eq } from 'drizzle-orm'
 import { now } from '../../utils/response.js'
+import type { AgentLanguage } from '../index.js'
 
-export function createScriptTools(episodeId: number) {
+export function createScriptTools(episodeId: number, language: AgentLanguage = 'zh') {
   const readEpisodeScript = createTool({
     id: 'read_episode_script',
     description: 'Read the script content of the current episode.',
@@ -22,6 +23,32 @@ export function createScriptTools(episodeId: number) {
       return { content, word_count: content.length, episode_id: episodeId }
     },
   })
+
+  const rewriteInstructionZh = (instructions: string | undefined, source: string) => `请将以下内容改写为格式化剧本。
+
+格式规范：
+- 场景头：## S编号 | 内景/外景 · 地点 | 时间段
+- 动作描写：自然段落，不包含镜头语言
+- 对白：角色名：（状态/表情）台词内容
+- 每个场景 30-60 秒内容
+
+${instructions || ''}
+
+【原始内容】
+${source}`
+
+  const rewriteInstructionEn = (instructions: string | undefined, source: string) => `Please rewrite the following content into a formatted screenplay.
+
+Format rules:
+- Scene header: ## S## | INT./EXT. · Location · Time of day
+- Action description: natural paragraphs, no camera language
+- Dialogue: Character: (state/expression) line content
+- Each scene: 30-60 seconds of content
+
+${instructions || ''}
+
+[Original content]
+${source}`
 
   const rewriteToScreenplay = createTool({
     id: 'rewrite_to_screenplay',
@@ -38,18 +65,9 @@ export function createScriptTools(episodeId: number) {
 
       return {
         source_content: source,
-        instruction: `请将以下内容改写为格式化剧本。
-
-格式规范：
-- 场景头：## S编号 | 内景/外景 · 地点 | 时间段
-- 动作描写：自然段落，不包含镜头语言
-- 对白：角色名：（状态/表情）台词内容
-- 每个场景 30-60 秒内容
-
-${instructions || ''}
-
-【原始内容】
-${source}`,
+        instruction: language === 'en'
+          ? rewriteInstructionEn(instructions, source)
+          : rewriteInstructionZh(instructions, source),
       }
     },
   })

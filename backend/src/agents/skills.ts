@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import type { AgentLanguage } from './index.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -34,7 +35,17 @@ function readSkill(skillId: string): string {
   ].join('\n')
 }
 
-export function loadAgentSkills(agentType: string): string {
+const SKILL_PREAMBLES: Record<AgentLanguage, string> = {
+  en: 'Below are the agent-specific project skill specifications (SKILL.md).\nDifferent agents load different skills; you only need to follow the skills injected here.\nYou must prioritize these specifications as long as they do not violate current tool boundaries; if a user explicitly requests otherwise, follow the user.',
+  zh: '以下是该 Agent 专属的项目技能规范（SKILL.md）。\n不同 Agent 会加载不同 skill；你只需要遵守当前注入的这些技能。\n你必须在不违背当前工具边界的前提下优先遵守这些规范；若与用户明确要求冲突，以用户要求为准。',
+}
+
+const SKILL_TRAILERS: Record<AgentLanguage, string> = {
+  en: '\n\n## Output Language\nAll output produced under this skill must be in English.',
+  zh: '',
+}
+
+export function loadAgentSkills(agentType: string, language: AgentLanguage = 'zh'): string {
   const skillIds = AGENT_SKILL_MAP[agentType] || []
   const contents = skillIds
     .map(readSkill)
@@ -43,10 +54,9 @@ export function loadAgentSkills(agentType: string): string {
   if (!contents.length) return ''
 
   return [
-    '以下是该 Agent 专属的项目技能规范（SKILL.md）。',
-    '不同 Agent 会加载不同 skill；你只需要遵守当前注入的这些技能。',
-    '你必须在不违背当前工具边界的前提下优先遵守这些规范；若与用户明确要求冲突，以用户要求为准。',
+    SKILL_PREAMBLES[language] || SKILL_PREAMBLES.zh,
     '',
     contents.join('\n\n'),
+    SKILL_TRAILERS[language] || SKILL_TRAILERS.zh,
   ].join('\n')
 }

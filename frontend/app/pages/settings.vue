@@ -2,7 +2,7 @@
   <div class="settings-layout">
     <aside class="settings-nav">
       <div class="nav-group">
-        <div class="nav-group-label">基础</div>
+        <div class="nav-group-label">{{ t('pages.settings.nav.basic') }}</div>
         <button v-for="t in baseTabs" :key="t.id" :class="['nav-item', { active: tab === t.id }]" @click="tab = t.id">
           <component :is="t.icon" :size="14" />
           {{ t.label }}
@@ -10,14 +10,14 @@
       </div>
       <div class="nav-advanced">
         <label class="advanced-toggle">
-          <span>Agent 高级配置</span>
+          <span>{{ t('pages.settings.nav.agentAdvanced') }}</span>
           <input type="checkbox" v-model="showAdvanced" />
           <span class="advanced-slider"></span>
         </label>
-        <p class="advanced-note">仅展开 Agent 配置与 Skills。工作台功能和分镜字段保持默认可见。</p>
+        <p class="advanced-note">{{ t('pages.settings.nav.advancedNote') }}</p>
       </div>
       <div v-if="showAdvanced" class="nav-group">
-        <div class="nav-group-label">高级</div>
+        <div class="nav-group-label">{{ t('pages.settings.nav.advanced') }}</div>
         <button v-for="t in advancedTabs" :key="t.id" :class="['nav-item', { active: tab === t.id }]" @click="tab = t.id">
           <component :is="t.icon" :size="14" />
           {{ t.label }}
@@ -32,26 +32,26 @@
         <div class="settings-head">
           <div class="settings-brand">
             <div class="settings-brand-mark">
-              <img v-if="showBrandImage" :src="brandLogo" alt="火宝短剧" class="settings-brand-logo" @error="showBrandImage = false" />
+              <img v-if="showBrandImage" :src="brandLogo" :alt="t('pages.settings.brand.alt')" class="settings-brand-logo" @error="showBrandImage = false" />
               <span v-else class="settings-brand-fallback">火</span>
             </div>
             <div class="settings-brand-copy">
-              <div class="settings-brand-kicker">Huobao Shorts</div>
-              <div class="settings-brand-name">火宝短剧</div>
+              <div class="settings-brand-kicker">{{ t('pages.settings.brand.kicker') }}</div>
+              <div class="settings-brand-name">{{ t('pages.settings.brand.name') }}</div>
             </div>
           </div>
-          <h2 class="settings-title">AI 服务配置</h2>
-          <p class="settings-desc">先用推荐模板快速落配置，再按服务类型微调。工作台创建集时会锁定所选图片、视频和音频能力。</p>
+          <h2 class="settings-title">{{ t('pages.settings.aiServices.title') }}</h2>
+          <p class="settings-desc">{{ t('pages.settings.aiServices.desc') }}</p>
         </div>
         <section class="setup-panel card">
           <div class="setup-panel-head">
             <div>
-              <div class="setup-kicker">Quick Setup</div>
-              <div class="setup-title">火宝推荐配置</div>
-              <div class="setup-desc">一键写入文本、图片、视频、音频四类推荐配置，适合作为开箱默认方案。</div>
+              <div class="setup-kicker">{{ t('pages.settings.aiServices.presetKicker') }}</div>
+              <div class="setup-title">{{ t('pages.settings.aiServices.presetTitle') }}</div>
+              <div class="setup-desc">{{ t('pages.settings.aiServices.presetDesc') }}</div>
             </div>
             <button class="btn btn-primary" @click="presetDialog = true">
-              <Sparkles :size="14" /> 火宝一键配置
+              <Sparkles :size="14" /> {{ t('pages.settings.aiServices.presetButton') }}
             </button>
           </div>
           <div class="preset-grid">
@@ -68,8 +68,8 @@
         <section class="setup-panel card">
           <div class="setup-panel-head compact">
             <div>
-              <div class="setup-title">快捷模板</div>
-              <div class="setup-desc">选择服务类型后，直接用模板填充推荐的 `provider / base URL / model`。</div>
+              <div class="setup-title">{{ t('pages.settings.aiServices.quickTemplate') }}</div>
+              <div class="setup-desc">{{ t('pages.settings.aiServices.quickTemplateDesc') }}</div>
             </div>
           </div>
           <div class="template-row">
@@ -88,10 +88,10 @@
             <div class="section-head">
               <div>
                 <span class="section-title">{{ st.label }}</span>
-                <div class="section-subtitle">{{ serviceMeta[st.type].desc }}</div>
+                <div class="section-subtitle">{{ t(`pages.settings.aiServices.serviceDesc.${st.type}`) }}</div>
               </div>
-              <span v-if="countActive(st.type)" class="tag tag-accent">{{ countActive(st.type) }} 已启用</span>
-              <button class="btn btn-ghost btn-sm ml-auto" @click="startAddCfg(st.type)"><Plus :size="13" /> 添加</button>
+              <span v-if="countActive(st.type)" class="tag tag-accent">{{ t('pages.settings.aiServices.enabledCount', { n: countActive(st.type) }) }}</span>
+              <button class="btn btn-ghost btn-sm ml-auto" @click="startAddCfg(st.type)"><Plus :size="13" /> {{ t('pages.settings.aiServices.add') }}</button>
             </div>
             <div class="config-list">
               <div v-for="c in byType(st.type)" :key="c.id" class="card config-row">
@@ -102,16 +102,16 @@
                       <span class="config-name">{{ c.name || `${c.provider}-${c.service_type}` }}</span>
                     </div>
                     <span class="config-model mono truncate">{{ fmtModel(c.model) }}</span>
-                    <span class="config-base mono truncate">{{ c.base_url || '未设置 Base URL' }}</span>
+                    <span class="config-base mono truncate">{{ c.base_url || t('pages.settings.aiServices.notSetBaseUrl') }}</span>
                   </div>
                 </div>
-                <span :class="['tag', c.api_key ? 'tag-success' : 'tag-error']">{{ c.api_key ? '已配置' : '无密钥' }}</span>
-                <button class="btn btn-ghost btn-sm" @click="testExistingCfg(c)">测试</button>
+                <span :class="['tag', c.api_key ? 'tag-success' : 'tag-error']">{{ c.api_key ? t('pages.settings.aiServices.configured') : t('pages.settings.aiServices.noKey') }}</span>
+                <button class="btn btn-ghost btn-sm" @click="testExistingCfg(c)">{{ t('pages.settings.aiServices.test') }}</button>
                 <label class="toggle"><input type="checkbox" :checked="c.is_active" @change="toggleCfg(c)"><span /></label>
                 <button class="btn btn-ghost btn-icon" @click="startEditCfg(c)"><Pencil :size="13" /></button>
                 <button class="btn btn-ghost btn-icon" @click="delCfg(c.id)"><Trash2 :size="13" /></button>
               </div>
-              <p v-if="!byType(st.type).length" class="config-empty">暂无配置</p>
+              <p v-if="!byType(st.type).length" class="config-empty">{{ t('pages.settings.aiServices.empty') }}</p>
             </div>
           </section>
         </div>
@@ -122,16 +122,16 @@
         <div class="settings-head">
           <div class="settings-brand">
             <div class="settings-brand-mark">
-              <img v-if="showBrandImage" :src="brandLogo" alt="火宝短剧" class="settings-brand-logo" @error="showBrandImage = false" />
+              <img v-if="showBrandImage" :src="brandLogo" :alt="t('pages.settings.brand.alt')" class="settings-brand-logo" @error="showBrandImage = false" />
               <span v-else class="settings-brand-fallback">火</span>
             </div>
             <div class="settings-brand-copy">
-              <div class="settings-brand-kicker">Huobao Shorts</div>
-              <div class="settings-brand-name">火宝短剧</div>
+              <div class="settings-brand-kicker">{{ t('pages.settings.brand.kicker') }}</div>
+              <div class="settings-brand-name">{{ t('pages.settings.brand.name') }}</div>
             </div>
           </div>
-          <h2 class="settings-title">Agent 配置</h2>
-          <p class="settings-desc">高级区只保留 Agent 运行配置。这里可以调整模型、提示词和参数，保存后立即生效。</p>
+          <h2 class="settings-title">{{ t('pages.settings.agents.title') }}</h2>
+          <p class="settings-desc">{{ t('pages.settings.agents.desc') }}</p>
         </div>
         <div class="agent-list">
           <div v-for="a in agentDefs" :key="a.type" class="card agent-card">
@@ -141,14 +141,14 @@
                 <div style="font-weight:600;font-size:14px">{{ a.label }}</div>
                 <div class="dim" style="font-size:12px">{{ a.type }}</div>
               </div>
-              <span v-if="getAgentCfg(a.type)" class="tag tag-success">已配置</span>
-              <span v-else class="tag">默认</span>
+              <span v-if="getAgentCfg(a.type)" class="tag tag-success">{{ t('pages.settings.agents.configured') }}</span>
+              <span v-else class="tag">{{ t('pages.settings.agents.default') }}</span>
               <ChevronDown :size="14" :style="{ transform: editingAgent === a.type ? 'rotate(180deg)' : '', transition: '0.2s' }" />
             </div>
             <div v-if="editingAgent === a.type" class="agent-card-body">
               <label class="field">
-                <span class="field-label">模型 <span class="dim">(留空使用 AI 服务默认)</span></span>
-                <BaseSelect v-model="agentForm.model" :options="textModelSelectOptions" placeholder="— 使用 AI 服务默认 —" searchable />
+                <span class="field-label">{{ t('pages.settings.agents.modelLabel') }} <span class="dim">{{ t('pages.settings.agents.modelDim') }}</span></span>
+                <BaseSelect v-model="agentForm.model" :options="textModelSelectOptions" :placeholder="t('pages.settings.agents.modelPlaceholder')" searchable />
               </label>
               <div class="field-row">
                 <label class="field">
@@ -161,17 +161,17 @@
                 </label>
               </div>
               <label class="field">
-                <span class="field-label">System Prompt</span>
-                <textarea v-model="agentForm.system_prompt" class="textarea" rows="12" placeholder="Agent 系统提示词..." />
+                <span class="field-label">{{ t('pages.settings.agents.systemPromptLabel') }}</span>
+                <textarea v-model="agentForm.system_prompt" class="textarea" rows="12" :placeholder="t('pages.settings.agents.systemPromptPlaceholder')" />
               </label>
               <div class="agent-card-foot">
-                <button class="btn btn-ghost btn-sm" @click="resetAgentPrompt(a.type)">恢复默认</button>
+                <button class="btn btn-ghost btn-sm" @click="resetAgentPrompt(a.type)">{{ t('pages.settings.agents.resetDefault') }}</button>
                 <span v-if="agentSaved === a.type" class="tag tag-success" style="margin-left:8px">
-                  <Check :size="10" /> 已保存
+                  <Check :size="10" /> {{ t('pages.settings.agents.saved') }}
                 </span>
                 <button class="btn btn-primary btn-sm ml-auto" :disabled="agentSaving" @click="saveAgentCfg(a.type)">
                   <Loader2 v-if="agentSaving" :size="12" class="animate-spin" />
-                  保存
+                  {{ t('pages.settings.agents.save') }}
                 </button>
               </div>
             </div>
@@ -183,7 +183,7 @@
       <div v-else-if="tab === 'skills'" class="skills-layout">
         <!-- Agent 左侧列表 -->
         <aside class="skills-agent-list">
-          <div class="skills-agent-title">Agent 列表</div>
+          <div class="skills-agent-title">{{ t('pages.settings.skills.agentsLabel') }}</div>
           <button
             v-for="a in agentDefs"
             :key="a.type"
@@ -201,12 +201,12 @@
           <div class="settings-head">
             <div class="settings-brand">
               <div class="settings-brand-mark">
-                <img v-if="showBrandImage" :src="brandLogo" alt="火宝短剧" class="settings-brand-logo" @error="showBrandImage = false" />
+                <img v-if="showBrandImage" :src="brandLogo" :alt="t('pages.settings.brand.alt')" class="settings-brand-logo" @error="showBrandImage = false" />
                 <span v-else class="settings-brand-fallback">火</span>
               </div>
               <div class="settings-brand-copy">
-                <div class="settings-brand-kicker">Huobao Shorts</div>
-                <div class="settings-brand-name">火宝短剧</div>
+                <div class="settings-brand-kicker">{{ t('pages.settings.brand.kicker') }}</div>
+                <div class="settings-brand-name">{{ t('pages.settings.brand.name') }}</div>
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:10px">
@@ -216,9 +216,9 @@
                 <div class="dim" style="font-size:12px">{{ selectedAgentType }} — Skills</div>
               </div>
             </div>
-            <p class="settings-desc" style="margin-top:10px">Skills 仅作为 Agent 的高级提示词层使用，不影响工作台常规功能入口。</p>
+            <p class="settings-desc" style="margin-top:10px">{{ t('pages.settings.skills.desc') }}</p>
             <button class="btn btn-primary btn-sm" @click="startAddSkill">
-              <Plus :size="13" /> 新增 Skill
+              <Plus :size="13" /> {{ t('pages.settings.skills.addSkill') }}
             </button>
           </div>
 
@@ -227,8 +227,8 @@
             <div class="empty-visual">
               <FileText :size="28" />
             </div>
-            <div class="empty-title">暂无 Skill</div>
-            <div class="empty-desc">点击右上角「新增 Skill」创建第一个提示词文件</div>
+            <div class="empty-title">{{ t('pages.settings.skills.empty') }}</div>
+            <div class="empty-desc">{{ t('pages.settings.skills.emptyDesc') }}</div>
           </div>
 
           <!-- Skill 列表 -->
@@ -251,16 +251,16 @@
                   class="textarea mono"
                   rows="20"
                   style="font-size:12px;line-height:1.6"
-                  placeholder="编写 SKILL.md 内容..."
+                  :placeholder="t('pages.settings.skills.editorPlaceholder')"
                 />
                 <div class="skill-card-foot">
                   <span class="dim" style="font-size:11px">skills/{{ selectedAgentType }}/{{ s.id }}/SKILL.md</span>
                   <span v-if="skillSaved === s.id" class="tag tag-success" style="margin-left:8px">
-                    <Check :size="10" /> 已保存
+                    <Check :size="10" /> {{ t('pages.settings.skills.saved') }}
                   </span>
                   <button class="btn btn-primary btn-sm ml-auto" :disabled="skillSaving" @click="saveSkill(s.id)">
                     <Loader2 v-if="skillSaving" :size="12" class="animate-spin" />
-                    保存
+                    {{ t('pages.settings.skills.save') }}
                   </button>
                 </div>
               </div>
@@ -275,11 +275,11 @@
       <form class="modal card config-modal" @submit.prevent="saveCfg">
         <div class="config-modal-head">
           <div>
-            <div class="setup-kicker">{{ cfgEditId ? 'Edit Config' : 'New Config' }}</div>
-            <h2 class="modal-title">{{ cfgEditId ? '编辑服务配置' : `添加${serviceMeta[cfgForm.service_type].label}服务` }}</h2>
-            <div class="modal-note">推荐先选择模板，系统会自动填入更合理的 `Base URL` 与默认模型。</div>
+            <div class="setup-kicker">{{ cfgEditId ? t('pages.settings.dialog.editConfig') : t('pages.settings.dialog.newConfig') }}</div>
+            <h2 class="modal-title">{{ cfgEditId ? t('pages.settings.dialog.editConfig') : t('pages.settings.dialog.addConfig', { label: t(`pages.settings.aiServices.serviceTypes.${cfgForm.service_type}`) }) }}</h2>
+            <div class="modal-note">{{ t('pages.settings.dialog.modalNote') }}</div>
           </div>
-          <span class="tag tag-accent">{{ serviceMeta[cfgForm.service_type].label }}</span>
+          <span class="tag tag-accent">{{ t(`pages.settings.aiServices.serviceTypes.${cfgForm.service_type}`) }}</span>
         </div>
         <div class="preset-picker">
           <button
@@ -293,24 +293,24 @@
           </button>
         </div>
         <label class="field">
-          <span class="field-label">配置名称</span>
-          <input v-model="cfgForm.name" class="input" placeholder="如 火宝默认图像服务" />
+          <span class="field-label">{{ t('pages.settings.dialog.fieldConfigName') }}</span>
+          <input v-model="cfgForm.name" class="input" :placeholder="t('pages.settings.dialog.fieldConfigNamePlaceholder')" />
         </label>
-        <label class="field"><span class="field-label">服务商</span>
-          <BaseSelect v-model="cfgForm.provider" :options="providerSelectOptions" placeholder="选择服务商" searchable />
+        <label class="field"><span class="field-label">{{ t('pages.settings.dialog.fieldProvider') }}</span>
+          <BaseSelect v-model="cfgForm.provider" :options="providerSelectOptions" :placeholder="t('pages.settings.dialog.fieldProviderPlaceholder')" searchable />
         </label>
         <label class="field">
-          <span class="field-label">优先级</span>
+          <span class="field-label">{{ t('pages.settings.dialog.fieldPriority') }}</span>
           <input v-model.number="cfgForm.priority" class="input" type="number" min="0" max="999" />
-          <span class="field-hint">数值越高越优先。工作台默认会优先使用同类型里优先级最高的启用配置。</span>
+          <span class="field-hint">{{ t('pages.settings.dialog.fieldPriorityHint') }}</span>
         </label>
         <label class="field"><span class="field-label">API Key</span><input v-model="cfgForm.api_key" class="input" type="password" placeholder="sk-..." /></label>
         <label class="field"><span class="field-label">Base URL</span><input v-model="cfgForm.base_url" class="input" placeholder="https://..." /></label>
         <div class="endpoint-hint">
-          <span class="dim">实际端点前缀：</span>
+          <span class="dim">{{ t('pages.settings.dialog.actualEndpoint') }}</span>
           <span class="mono">{{ endpointHint }}</span>
         </div>
-        <label class="field"><span class="field-label">模型（逗号分隔）</span><input v-model="cfgForm.modelStr" class="input" placeholder="model-name" /></label>
+        <label class="field"><span class="field-label">{{ t('pages.settings.dialog.fieldModel') }}</span><input v-model="cfgForm.modelStr" class="input" :placeholder="t('pages.settings.dialog.fieldModelPlaceholder')" /></label>
         <div v-if="cfgTestResult" class="test-result" :class="{ ok: cfgTestResult.reachable, bad: !cfgTestResult.reachable }">
           <div class="test-result-head">
             <span class="tag" :class="cfgTestResult.reachable ? 'tag-success' : 'tag-error'">{{ cfgTestResult.status || 'ERROR' }}</span>
@@ -322,10 +322,10 @@
         <div class="modal-actions">
           <button type="button" class="btn btn-ghost" :disabled="cfgTesting" @click="testDraftCfg">
             <Loader2 v-if="cfgTesting" :size="12" class="animate-spin" />
-            <span v-else>测试配置</span>
+            <span v-else>{{ t('pages.settings.dialog.testConfig') }}</span>
           </button>
-          <button type="button" class="btn" @click="cfgDialog = false">取消</button>
-          <button type="submit" class="btn btn-primary">保存</button>
+          <button type="button" class="btn" @click="cfgDialog = false">{{ t('pages.settings.dialog.cancel') }}</button>
+          <button type="submit" class="btn btn-primary">{{ t('pages.settings.dialog.save') }}</button>
         </div>
       </form>
     </div>
@@ -335,17 +335,17 @@
       <form class="modal card config-modal" @submit.prevent="applyHuobaoPreset">
         <div class="config-modal-head">
           <div>
-            <div class="setup-kicker">Huobao Preset</div>
-            <h2 class="modal-title">火宝一键配置</h2>
-            <div class="modal-note">按火宝推荐链路自动创建或更新 4 条服务配置，并同时初始化 5 个 Agent 的默认模型。</div>
+            <div class="setup-kicker">{{ t('pages.settings.aiServices.presetDialogKicker') }}</div>
+            <h2 class="modal-title">{{ t('pages.settings.aiServices.presetDialogTitle') }}</h2>
+            <div class="modal-note">{{ t('pages.settings.aiServices.presetDialogNote') }}</div>
           </div>
-          <span class="tag tag-success">推荐</span>
+          <span class="tag tag-success">{{ t('pages.settings.aiServices.recommendedTag') }}</span>
         </div>
         <div class="huobao-grid">
           <label class="field">
-            <span class="field-label">Huobao API Key <span class="dim">(统一用于文本 / 图片 / 视频 / 音频)</span></span>
-            <input v-model="huobaoForm.apiKey" class="input" type="password" placeholder="用于 api.chatfire.site 全链路服务" />
-            <span class="field-hint">还没有账号？<a href="https://api.chatfire.site/" target="_blank" rel="noopener">立即注册 →</a></span>
+            <span class="field-label">Huobao API Key <span class="dim">{{ t('pages.settings.aiServices.apiKeyHint') }}</span></span>
+            <input v-model="huobaoForm.apiKey" class="input" type="password" :placeholder="t('pages.settings.aiServices.apiKeyPlaceholder')" />
+            <span class="field-hint">{{ t('pages.settings.aiServices.apiKeyRegisterPrompt') }}<a href="https://api.chatfire.site/" target="_blank" rel="noopener">{{ t('pages.settings.aiServices.apiKeyRegisterLink') }}</a></span>
           </label>
         </div>
         <div class="preset-grid compact">
@@ -359,8 +359,8 @@
           </article>
         </div>
         <div class="modal-actions">
-          <button type="button" class="btn" @click="presetDialog = false">取消</button>
-          <button type="submit" class="btn btn-primary">创建并启用</button>
+          <button type="button" class="btn" @click="presetDialog = false">{{ t('pages.settings.dialog.cancel') }}</button>
+          <button type="submit" class="btn btn-primary">{{ t('pages.settings.dialog.createAndEnable') }}</button>
         </div>
       </form>
     </div>
@@ -368,22 +368,22 @@
     <!-- Add Skill Dialog -->
     <div v-if="addSkillDialog" class="overlay" @click.self="addSkillDialog = false">
       <form class="modal card" @submit.prevent="confirmAddSkill">
-        <h2 class="modal-title">新增 Skill — {{ selectedAgentLabel }}</h2>
+        <h2 class="modal-title">{{ t('pages.settings.skills.addDialogTitle', { agent: selectedAgentLabel }) }}</h2>
         <label class="field">
-          <span class="field-label">Skill 目录名 <span class="dim">(英文，唯一)</span></span>
-          <input v-model="newSkillForm.id" class="input" placeholder="如 custom-extraction" />
+          <span class="field-label">{{ t('pages.settings.skills.skillDirLabel') }} <span class="dim">{{ t('pages.settings.skills.skillDirDim') }}</span></span>
+          <input v-model="newSkillForm.id" class="input" :placeholder="t('pages.settings.skills.skillDirPlaceholder')" />
         </label>
         <label class="field">
-          <span class="field-label">名称</span>
-          <input v-model="newSkillForm.name" class="input" placeholder="如 自定义提取规则" />
+          <span class="field-label">{{ t('pages.settings.skills.nameLabel') }}</span>
+          <input v-model="newSkillForm.name" class="input" :placeholder="t('pages.settings.skills.namePlaceholder')" />
         </label>
         <label class="field">
-          <span class="field-label">描述</span>
-          <input v-model="newSkillForm.description" class="input" placeholder="简短描述此 Skill 的用途" />
+          <span class="field-label">{{ t('pages.settings.skills.descLabel') }}</span>
+          <input v-model="newSkillForm.description" class="input" :placeholder="t('pages.settings.skills.descPlaceholder')" />
         </label>
         <div class="modal-actions">
-          <button type="button" class="btn" @click="addSkillDialog = false">取消</button>
-          <button type="submit" class="btn btn-primary" :disabled="!newSkillForm.id">创建</button>
+          <button type="button" class="btn" @click="addSkillDialog = false">{{ t('pages.settings.dialog.cancel') }}</button>
+          <button type="submit" class="btn btn-primary" :disabled="!newSkillForm.id">{{ t('pages.settings.dialog.createAndEnable') }}</button>
         </div>
       </form>
     </div>
@@ -397,16 +397,18 @@ import { toast } from 'vue-sonner'
 import { aiConfigAPI, agentConfigAPI, skillsAPI } from '~/composables/useApi'
 import brandLogo from '~/assets/huobao-logo.png'
 
+const { t } = useI18n()
+
 const showBrandImage = ref(true)
 const tab = ref('ai')
 const showAdvanced = ref(false)
-const baseTabs = [
-  { id: 'ai', label: 'AI 服务', icon: Cpu },
-]
-const advancedTabs = [
-  { id: 'agents', label: 'Agent 配置', icon: Bot },
-  { id: 'skills', label: 'Skills', icon: FileText },
-]
+const baseTabs = computed(() => [
+  { id: 'ai', label: t('pages.settings.nav.aiServices'), icon: Cpu },
+])
+const advancedTabs = computed(() => [
+  { id: 'agents', label: t('pages.settings.nav.agents'), icon: Bot },
+  { id: 'skills', label: t('pages.settings.nav.skills'), icon: FileText },
+])
 watch(showAdvanced, (v) => {
   if (!v && tab.value !== 'ai') tab.value = 'ai'
 })
@@ -420,7 +422,12 @@ const cfgTesting = ref(false)
 const cfgTestResult = ref(null)
 const cfgForm = reactive({ name: '', provider: '', api_key: '', base_url: '', modelStr: '', service_type: 'text', priority: 0 })
 const huobaoForm = reactive({ apiKey: '' })
-const serviceTypes = [{ type: 'text', label: '文本' }, { type: 'image', label: '图片' }, { type: 'video', label: '视频' }, { type: 'audio', label: '音频' }]
+const serviceTypes = computed(() => [
+  { type: 'text', label: t('pages.settings.aiServices.serviceTypes.text') },
+  { type: 'image', label: t('pages.settings.aiServices.serviceTypes.image') },
+  { type: 'video', label: t('pages.settings.aiServices.serviceTypes.video') },
+  { type: 'audio', label: t('pages.settings.aiServices.serviceTypes.audio') },
+])
 const providers = ['ali', 'chatfire', 'gemini', 'minimax', 'openai', 'openrouter', 'vidu', 'volcengine']
 const providerSelectOptions = computed(() => providers.map(p => ({ label: p, value: p })))
 const serviceMeta = {
@@ -470,7 +477,7 @@ const endpointHint = computed(() => {
   const provider = cfgForm.provider
   const base = cfgForm.base_url || 'https://...'
   const prefix = endpointPrefixes[provider] || ''
-  if (!provider) return '选择服务商后显示推荐端点前缀'
+  if (!provider) return t('pages.settings.dialog.recommendedEndpoint')
   return `${base}${prefix}`
 })
 
@@ -492,7 +499,7 @@ function applyProviderPreset(type, provider) {
 
 async function loadCfgs() { try { cfgs.value = await aiConfigAPI.list() } catch (e) { toast.error(e.message) } }
 async function toggleCfg(c) { await aiConfigAPI.update(c.id, { is_active: !c.is_active }); loadCfgs() }
-async function delCfg(id) { await aiConfigAPI.del(id); toast.success('已删除'); loadCfgs() }
+async function delCfg(id) { await aiConfigAPI.del(id); toast.success(t('pages.settings.toast.deleted')); loadCfgs() }
 function startAddCfg(t) {
   cfgEditId.value = null
   cfgTestResult.value = null
@@ -519,8 +526,8 @@ async function testCfgPayload(payload) {
   cfgTesting.value = true
   try {
     cfgTestResult.value = await aiConfigAPI.test(payload)
-    if (cfgTestResult.value.reachable) toast.success('端点已响应')
-    else toast.warning('端点未通过测试')
+    if (cfgTestResult.value.reachable) toast.success(t('pages.settings.toast.endpointReachable'))
+    else toast.warning(t('pages.settings.toast.endpointFailed'))
   } catch (e) {
     toast.error(e.message)
   } finally {
@@ -547,17 +554,17 @@ async function testExistingCfg(c) {
   })
 }
 async function saveCfg() {
-  if (!cfgForm.provider) { toast.warning('选择服务商'); return }
+  if (!cfgForm.provider) { toast.warning(t('pages.settings.toast.selectProvider')); return }
   const models = cfgForm.modelStr.split(',').map(s => s.trim()).filter(Boolean)
   try {
     if (cfgEditId.value) await aiConfigAPI.update(cfgEditId.value, { name: cfgForm.name, provider: cfgForm.provider, api_key: cfgForm.api_key, base_url: cfgForm.base_url, model: models, priority: cfgForm.priority })
     else await aiConfigAPI.create({ service_type: cfgForm.service_type, provider: cfgForm.provider, name: cfgForm.name || `${cfgForm.provider}-${cfgForm.service_type}`, api_key: cfgForm.api_key, base_url: cfgForm.base_url, model: models, priority: cfgForm.priority })
-    cfgDialog.value = false; toast.success('已保存'); loadCfgs()
+    cfgDialog.value = false; toast.success(t('pages.settings.toast.saved')); loadCfgs()
   } catch (e) { toast.error(e.message) }
 }
 async function applyHuobaoPreset() {
   if (!huobaoForm.apiKey) {
-    toast.warning('请填写 Huobao API Key')
+    toast.warning(t('pages.settings.toast.apiKeyRequired'))
     return
   }
   try {
@@ -565,7 +572,7 @@ async function applyHuobaoPreset() {
     await loadCfgs()
     await loadAgents()
     presetDialog.value = false
-    toast.success('火宝推荐配置与默认 Agent LLM 已写入')
+    toast.success(t('pages.settings.toast.huobaoWritten'))
   } catch (e) {
     toast.error(e.message)
   }
@@ -713,7 +720,7 @@ function toggleAgentEdit(type) {
 
 function resetAgentPrompt(type) {
   agentForm.system_prompt = defaultPrompts[type] || ''
-  toast.info('已恢复默认提示词，点击保存生效')
+  toast.info(t('pages.settings.toast.defaultPromptRestored'))
 }
 
 async function saveAgentCfg(type) {
@@ -736,7 +743,7 @@ async function saveAgentCfg(type) {
     }
     await loadAgents()
     agentSaved.value = type
-    toast.success(`${agentDefs.find(a => a.type === type)?.label} 配置已保存`)
+    toast.success(t('pages.settings.toast.agentSaved', { label: agentDefs.find(a => a.type === type)?.label || type }))
     setTimeout(() => { if (agentSaved.value === type) agentSaved.value = null }, 3000)
   } catch (e) {
     toast.error(e.message)
@@ -791,19 +798,19 @@ async function confirmAddSkill() {
     await skillsAPI.create({ id: skillId, name: newSkillForm.name, description: newSkillForm.description })
     addSkillDialog.value = false
     await loadAllSkills()
-    toast.success('Skill 创建成功')
+    toast.success(t('pages.settings.skills.createSuccess'))
   } catch (e) {
     toast.error(e.message)
   }
 }
 
 async function deleteSkill(id) {
-  if (!confirm(`确定删除 Skill「${id}」？`)) return
+  if (!confirm(t('pages.settings.skills.deleteConfirm', { id }))) return
   try {
     await skillsAPI.del(id)
     if (editingSkill.value === id) editingSkill.value = null
     await loadAllSkills()
-    toast.success('已删除')
+    toast.success(t('pages.settings.toast.skillDeleted'))
   } catch (e) {
     toast.error(e.message)
   }
@@ -826,7 +833,7 @@ async function saveSkill(id) {
     await skillsAPI.update(id, skillContent.value)
     await loadAllSkills()
     skillSaved.value = id
-    toast.success(`已保存`)
+    toast.success(t('pages.settings.toast.saved'))
     setTimeout(() => { if (skillSaved.value === id) skillSaved.value = null }, 3000)
   } catch (e) {
     toast.error(e.message)

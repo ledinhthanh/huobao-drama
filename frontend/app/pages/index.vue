@@ -3,14 +3,14 @@
     <!-- Page Header -->
     <div class="page-head">
       <div class="head-left">
-        <h1 class="page-title">短剧项目</h1>
-        <p class="page-desc">{{ dramas.length }} 个项目</p>
+        <h1 class="page-title">{{ t('pages.index.title') }}</h1>
+        <p class="page-desc">{{ t('pages.index.projectCount', { count: dramas.length }) }}</p>
       </div>
       <button class="btn btn-primary" @click="showCreate = true">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
-        新建项目
+        {{ t('pages.index.createProject') }}
       </button>
     </div>
 
@@ -39,9 +39,9 @@
           <div class="card-header">
             <div class="episode-badge">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
-              {{ d.episodes?.length || 0 }} 集
+              {{ d.episodes?.length || 0 }} {{ t('pages.index.episodesUnit') }}
             </div>
-            <button class="btn btn-ghost btn-icon card-delete" @click.stop="delDrama(d)" title="删除">
+            <button class="btn btn-ghost btn-icon card-delete" @click.stop="delDrama(d)" :title="t('common.delete')">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
               </svg>
@@ -82,8 +82,8 @@
             <line x1="8" y1="12" x2="16" y2="12"/>
           </svg>
         </div>
-        <p class="empty-title">新建第一个短剧项目</p>
-        <p class="empty-desc">从剧本到成片，AI 助力的短剧制作工作台</p>
+        <p class="empty-title">{{ t('pages.index.createFirst') }}</p>
+        <p class="empty-desc">{{ t('pages.index.createFirstDesc') }}</p>
       </div>
     </div>
 
@@ -97,31 +97,31 @@
               <line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
             </svg>
           </div>
-          <h2 class="modal-title">新建短剧项目</h2>
-          <p class="modal-desc">输入项目基本信息，即可开始制作</p>
+          <h2 class="modal-title">{{ t('pages.index.modalTitle') }}</h2>
+          <p class="modal-desc">{{ t('pages.index.modalDesc') }}</p>
         </div>
         <form @submit.prevent="create" class="modal-form">
           <label class="field">
-            <span class="field-label">项目名称 <span class="required">*</span></span>
-            <input v-model="form.title" class="input" placeholder="例如：都市情感短剧《时光邮局》" required autofocus />
+            <span class="field-label">{{ t('pages.index.fieldProjectName') }} <span class="required">*</span></span>
+            <input v-model="form.title" class="input" :placeholder="t('pages.index.fieldProjectNamePlaceholder')" required autofocus />
           </label>
           <div class="field-row">
             <label class="field">
-              <span class="field-label">计划集数</span>
+              <span class="field-label">{{ t('pages.index.fieldEpisodeCount') }}</span>
               <input v-model.number="form.total_episodes" class="input" type="number" min="1" max="100" />
             </label>
             <label class="field">
-              <span class="field-label">视觉风格</span>
-              <BaseSelect v-model="form.style" :options="styleSelectOptions" placeholder="选择风格" searchable />
+              <span class="field-label">{{ t('pages.index.fieldStyle') }}</span>
+              <BaseSelect v-model="form.style" :options="styleSelectOptions" :placeholder="t('pages.index.stylePlaceholder')" searchable />
             </label>
           </div>
           <div class="modal-actions">
-            <button type="button" class="btn" @click="showCreate = false">取消</button>
+            <button type="button" class="btn" @click="showCreate = false">{{ t('common.cancel') }}</button>
             <button type="submit" class="btn btn-primary">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
                 <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
               </svg>
-              创建项目
+              {{ t('pages.index.create') }}
             </button>
           </div>
         </form>
@@ -134,6 +134,8 @@
 import { toast } from 'vue-sonner'
 import { dramaAPI } from '~/composables/useApi'
 import BaseSelect from '~/components/BaseSelect.vue'
+
+const { t, locale } = useI18n()
 
 const dramas = ref([])
 const loading = ref(false)
@@ -166,10 +168,10 @@ async function create() {
 }
 
 async function delDrama(d) {
-  if (!confirm(`确定删除「${d.title}」？此操作不可恢复。`)) return
+  if (!confirm(t('pages.index.deleteConfirm', { title: d.title }))) return
   try {
     await dramaAPI.del(d.id)
-    toast.success('已删除')
+    toast.success(t('pages.index.deleted'))
     load()
   } catch (e) {
     toast.error(e.message)
@@ -181,11 +183,11 @@ function fmtDate(s) {
   const d = new Date(s)
   const now = new Date()
   const diff = now.getTime() - d.getTime()
-  if (diff < 60000) return '刚刚'
-  if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟前`
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时前`
-  if (diff < 604800000) return `${Math.floor(diff / 86400000)} 天前`
-  return d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
+  if (diff < 60000) return t('pages.index.justNow')
+  if (diff < 3600000) return t('pages.index.minutesAgo', { n: Math.floor(diff / 60000) })
+  if (diff < 86400000) return t('pages.index.hoursAgo', { n: Math.floor(diff / 3600000) })
+  if (diff < 604800000) return t('pages.index.daysAgo', { n: Math.floor(diff / 86400000) })
+  return d.toLocaleDateString(locale.value, { month: 'short', day: 'numeric' })
 }
 
 function getProgress(d) {

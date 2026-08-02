@@ -11,8 +11,9 @@ import { createTool } from '@mastra/core/tools'
 import { z } from 'zod'
 import { db, schema } from '../../db/index.js'
 import { eq } from 'drizzle-orm'
+import type { AgentLanguage } from '../index.js'
 
-export function createGridPromptTools(episodeId: number, dramaId: number) {
+export function createGridPromptTools(episodeId: number, dramaId: number, language: AgentLanguage = 'zh') {
 
   // ─── 角色提示词 ───────────────────────────────────────
 
@@ -158,7 +159,15 @@ export function createGridPromptTools(episodeId: number, dramaId: number) {
     execute: async ({ shots, rows, cols, mode, reference_legend }) => {
       if (!shots.length) return { error: 'No shots provided', grid_prompt: '', cell_prompts: [] }
       const totalCells = rows * cols
-      const legendPrefix = reference_legend ? `参考图映射：${reference_legend}, ` : ''
+      const legendPrefix = reference_legend
+        ? (language === 'en' ? `Reference legend: ${reference_legend}, ` : `参考图映射：${reference_legend}, `)
+        : ''
+      const cellPrefix = (i: number, refPart: string) => language === 'en'
+        ? `Cell ${i + 1}: ${refPart}`
+        : `格${i + 1}：${refPart}`
+      const refPart = reference_legend
+        ? (language === 'en' ? `Refer to ${reference_legend}, ` : `参考${reference_legend}，`)
+        : ''
 
       if (mode === 'multi_ref') {
         const sb = shots[0]
@@ -166,7 +175,7 @@ export function createGridPromptTools(episodeId: number, dramaId: number) {
         const cellPrompts = Array.from({ length: totalCells }, (_, i) => ({
           shot_number: sb.shot_number,
           frame_type: 'reference',
-          prompt: `格${i + 1}：${reference_legend ? `参考${reference_legend}，` : ''}${sb.description}, cinematic lighting, consistent with other cells in the ${rows}x${cols} grid`,
+          prompt: `${cellPrefix(i, refPart)}${sb.description}, cinematic lighting, consistent with other cells in the ${rows}x${cols} grid`,
         }))
         return { grid_prompt: gridPrompt, cell_prompts: cellPrompts }
       }
@@ -180,8 +189,8 @@ export function createGridPromptTools(episodeId: number, dramaId: number) {
             shot_number: s.shot_number,
             frame_type: isFirst ? 'first_frame' : 'last_frame',
             prompt: isFirst
-              ? `格${i + 1}：${reference_legend ? `参考${reference_legend}，` : ''}${s.description}${s.location ? `, ${s.location}` : ''}${s.shot_type ? `, ${s.shot_type}` : ''}, opening scene`
-              : `格${i + 1}：${reference_legend ? `参考${reference_legend}，` : ''}${s.description}${s.location ? `, ${s.location}` : ''}${s.shot_type ? `, ${s.shot_type}` : ''}, ending scene, continuous motion`,
+              ? `${cellPrefix(i, refPart)}${s.description}${s.location ? `, ${s.location}` : ''}${s.shot_type ? `, ${s.shot_type}` : ''}, opening scene`
+              : `${cellPrefix(i, refPart)}${s.description}${s.location ? `, ${s.location}` : ''}${s.shot_type ? `, ${s.shot_type}` : ''}, ending scene, continuous motion`,
           })
         }
         const gridPrompt = `${rows}x${cols} grid layout, exactly ${totalCells} visible panels, consistent art style, cinematic quality, ${legendPrefix}${shots.map(s => s.description).join(' | ')}, no merged panels, no missing panels, no text, no watermark`
@@ -194,7 +203,7 @@ export function createGridPromptTools(episodeId: number, dramaId: number) {
         return {
           shot_number: s.shot_number,
           frame_type: 'first_frame',
-          prompt: `格${i + 1}：${reference_legend ? `参考${reference_legend}，` : ''}${s.description}${s.location ? `, ${s.location}` : ''}${s.shot_type ? `, ${s.shot_type}` : ''}, opening scene`,
+          prompt: `${cellPrefix(i, refPart)}${s.description}${s.location ? `, ${s.location}` : ''}${s.shot_type ? `, ${s.shot_type}` : ''}, opening scene`,
         }
       })
       const gridPrompt = `${rows}x${cols} grid layout, exactly ${totalCells} visible panels, consistent art style, cinematic quality, ${legendPrefix}${shots.map(s => s.description).join(' | ')}, no merged panels, no missing panels, no text, no watermark`
