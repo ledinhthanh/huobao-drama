@@ -80,6 +80,11 @@ data-dir: ## Tạo thư mục data nếu chưa có
 	@mkdir -p $(DATA_DIR)/static $(DATA_DIR)/storage
 	@echo "$(GREEN)✓ Đã chuẩn bị thư mục data$(RESET)"
 
+.PHONY: dist-symlink
+dist-symlink: ## Tạo symlink frontend/dist -> .output/public (backend serve từ dist/)
+	@cd $(FRONTEND_DIR) && [ -L dist ] || ln -s .output/public dist
+	@echo "$(GREEN)✓ frontend/dist -> .output/public$(RESET)"
+
 # ─── Install ──────────────────────────────────────────────────
 .PHONY: install
 install: install-backend install-frontend ## Cài đặt dependencies cho backend và frontend
@@ -121,7 +126,7 @@ dev-all: ## Chạy backend + frontend song song (cần GNU parallel hoặc mở 
 
 # ─── Production build ─────────────────────────────────────────
 .PHONY: build
-build: build-frontend ## Build production (frontend + chuẩn bị backend)
+build: build-frontend dist-symlink ## Build production (frontend + symlink dist)
 	@echo "$(GREEN)✓ Build hoàn tất$(RESET)"
 
 .PHONY: build-frontend
