@@ -79,6 +79,21 @@ function buildProbe(serviceType: string, provider: string, baseUrl: string, mode
     }
   }
 
+  if (p === 'wan') {
+    // Wan 2.2/2.5/2.6 兼容 DashScope 异步接口 (T2V, I2V, T2I)
+    return {
+      method: 'POST',
+      url: joinProviderUrl(baseUrl, '/api/v1', serviceType === 'video'
+        ? '/services/aigc/video-generation/video-synthesis'
+        : '/services/aigc/image-generation/generation'),
+      headers: {
+        ...bearerHeaders(apiKey, true),
+        'X-DashScope-Async': 'enable',
+      },
+      body: {},
+    }
+  }
+
   if (p === 'volcengine') {
     const path = serviceType === 'video'
       ? '/contents/generations/tasks'
