@@ -159,7 +159,7 @@ async function load() {
 async function create() {
   if (!form.value.title?.trim()) return
   try {
-    const d = await dramaAPI.create(form.value)
+    const d = await dramaAPI.create({ ...form.value, language: locale.value })
     showCreate.value = false
     navigateTo(`/drama/${d.id}`)
   } catch (e) {

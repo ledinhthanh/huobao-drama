@@ -33,7 +33,7 @@
           <div class="settings-brand">
             <div class="settings-brand-mark">
               <img v-if="showBrandImage" :src="brandLogo" :alt="t('pages.settings.brand.alt')" class="settings-brand-logo" @error="showBrandImage = false" />
-              <span v-else class="settings-brand-fallback">火</span>
+              <span v-else class="settings-brand-fallback">{{ t('layouts.default.brandMark') }}</span>
             </div>
             <div class="settings-brand-copy">
               <div class="settings-brand-kicker">{{ t('pages.settings.brand.kicker') }}</div>
@@ -123,7 +123,7 @@
           <div class="settings-brand">
             <div class="settings-brand-mark">
               <img v-if="showBrandImage" :src="brandLogo" :alt="t('pages.settings.brand.alt')" class="settings-brand-logo" @error="showBrandImage = false" />
-              <span v-else class="settings-brand-fallback">火</span>
+              <span v-else class="settings-brand-fallback">{{ t('layouts.default.brandMark') }}</span>
             </div>
             <div class="settings-brand-copy">
               <div class="settings-brand-kicker">{{ t('pages.settings.brand.kicker') }}</div>
@@ -202,7 +202,7 @@
             <div class="settings-brand">
               <div class="settings-brand-mark">
                 <img v-if="showBrandImage" :src="brandLogo" :alt="t('pages.settings.brand.alt')" class="settings-brand-logo" @error="showBrandImage = false" />
-                <span v-else class="settings-brand-fallback">火</span>
+                <span v-else class="settings-brand-fallback">{{ t('layouts.default.brandMark') }}</span>
               </div>
               <div class="settings-brand-copy">
                 <div class="settings-brand-kicker">{{ t('pages.settings.brand.kicker') }}</div>
@@ -397,7 +397,7 @@ import { toast } from 'vue-sonner'
 import { aiConfigAPI, agentConfigAPI, skillsAPI } from '~/composables/useApi'
 import brandLogo from '~/assets/huobao-logo.png'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const showBrandImage = ref(true)
 const tab = ref('ai')
@@ -428,39 +428,41 @@ const serviceTypes = computed(() => [
   { type: 'video', label: t('pages.settings.aiServices.serviceTypes.video') },
   { type: 'audio', label: t('pages.settings.aiServices.serviceTypes.audio') },
 ])
-const providers = ['ali', 'chatfire', 'gemini', 'minimax', 'openai', 'openrouter', 'vidu', 'volcengine']
+const providers = ['ali', 'chatfire', 'gemini', 'minimax', 'openai', 'openrouter', 'vidu', 'volcengine', 'wan']
 const providerSelectOptions = computed(() => providers.map(p => ({ label: p, value: p })))
-const serviceMeta = {
-  text: { label: '文本', desc: '剧本改写、角色场景提取、分镜拆解等 Agent 文本能力' },
-  image: { label: '图片', desc: '角色图、场景图、镜头图与首尾帧等静态图像生成' },
-  video: { label: '视频', desc: '镜头视频生成，支持单图、多图和首尾帧模式' },
-  audio: { label: '音频', desc: '角色试听、旁白与对白语音生成' },
-}
+const serviceMeta = computed(() => ({
+  text:   { label: t('pages.settings.aiServices.serviceTypes.text'),   desc: t('pages.settings.aiServices.serviceDesc.text') },
+  image:  { label: t('pages.settings.aiServices.serviceTypes.image'),  desc: t('pages.settings.aiServices.serviceDesc.image') },
+  video:  { label: t('pages.settings.aiServices.serviceTypes.video'),  desc: t('pages.settings.aiServices.serviceDesc.video') },
+  audio:  { label: t('pages.settings.aiServices.serviceTypes.audio'),  desc: t('pages.settings.aiServices.serviceDesc.audio') },
+}))
 const providerPresets = {
   text: {
-    chatfire: { label: 'ChatFire 推荐', baseUrl: 'https://api.chatfire.site', models: ['gemini-3-pro-preview'] },
-    openrouter: { label: 'OpenRouter 推荐', baseUrl: 'https://openrouter.ai/api', models: ['google/gemini-3-flash-preview'] },
-    openai: { label: 'OpenAI 推荐', baseUrl: 'https://api.openai.com', models: ['gpt-4.1-mini'] },
+    chatfire: { label: t('pages.settings.toast.providerPreset.chatfire'), baseUrl: 'https://api.chatfire.site', models: ['gemini-3-pro-preview'] },
+    openrouter: { label: t('pages.settings.toast.providerPreset.openrouter'), baseUrl: 'https://openrouter.ai/api', models: ['google/gemini-3-flash-preview'] },
+    openai: { label: t('pages.settings.toast.providerPreset.openai'), baseUrl: 'https://api.openai.com', models: ['gpt-4.1-mini'] },
   },
   image: {
-    chatfire: { label: 'ChatFire 推荐', baseUrl: 'https://api.chatfire.site', models: ['doubao-seedream-4-5-251128'] },
-    gemini: { label: 'Gemini 推荐', baseUrl: 'https://api.chatfire.site', models: ['gemini-3-pro-image-preview'] },
-    volcengine: { label: '火山推荐', baseUrl: 'https://ark.cn-beijing.volces.com', models: ['doubao-seedream-4-0-250828'] },
+    chatfire: { label: t('pages.settings.toast.providerPreset.chatfire'), baseUrl: 'https://api.chatfire.site', models: ['doubao-seedream-4-5-251128'] },
+    gemini: { label: t('pages.settings.toast.providerPreset.gemini'), baseUrl: 'https://api.chatfire.site', models: ['gemini-3-pro-image-preview'] },
+    volcengine: { label: t('pages.settings.toast.providerPreset.volcengine'), baseUrl: 'https://ark.cn-beijing.volces.com', models: ['doubao-seedream-4-0-250828'] },
+    wan: { label: t('pages.settings.toast.providerPreset.wan'), baseUrl: 'http://localhost:8080', models: ['wan2.2-t2i-flash'] },
   },
   video: {
-    volcengine: { label: '火宝视频', baseUrl: 'https://api.chatfire.site/volcengine', models: ['doubao-seedance-1-5-pro-251215'] },
-    vidu: { label: 'Vidu 推荐', baseUrl: 'https://api.vidu.com', models: ['viduq3-turbo'] },
-    ali: { label: '阿里推荐', baseUrl: 'https://dashscope.aliyuncs.com', models: ['wan2.6-i2v-flash'] },
+    volcengine: { label: t('pages.settings.toast.providerPreset.huobaoVideo'), baseUrl: 'https://api.chatfire.site/volcengine', models: ['doubao-seedance-1-5-pro-251215'] },
+    vidu: { label: t('pages.settings.toast.providerPreset.vidu'), baseUrl: 'https://api.vidu.com', models: ['viduq3-turbo'] },
+    ali: { label: t('pages.settings.toast.providerPreset.ali'), baseUrl: 'https://dashscope.aliyuncs.com', models: ['wan2.6-i2v-flash'] },
+    wan: { label: t('pages.settings.toast.providerPreset.wan'), baseUrl: 'http://localhost:8080', models: ['wan2.2-t2v-plus'] },
   },
   audio: {
-    minimax: { label: '火宝音频', baseUrl: 'https://api.chatfire.site/minimax', models: ['speech-2.8-hd'] },
+    minimax: { label: t('pages.settings.toast.providerPreset.huobaoAudio'), baseUrl: 'https://api.chatfire.site/minimax', models: ['speech-2.8-hd'] },
   },
 }
 const huobaoPresetCards = [
-  { serviceType: 'text', label: '文本', provider: 'chatfire', baseUrl: 'https://api.chatfire.site', model: 'gemini-3-pro-preview', priority: 100 },
-  { serviceType: 'image', label: '图片', provider: 'gemini', baseUrl: 'https://api.chatfire.site', model: 'gemini-3-pro-image-preview', priority: 99 },
-  { serviceType: 'video', label: '视频', provider: 'volcengine', baseUrl: 'https://api.chatfire.site/volcengine', model: 'doubao-seedance-1-5-pro-251215', priority: 98 },
-  { serviceType: 'audio', label: '音频', provider: 'minimax', baseUrl: 'https://api.chatfire.site/minimax', model: 'speech-2.8-hd', priority: 97 },
+  { serviceType: 'text', label: t('pages.settings.toast.huobaoPresetCard.text'), provider: 'chatfire', baseUrl: 'https://api.chatfire.site', model: 'gemini-3-pro-preview', priority: 100 },
+  { serviceType: 'image', label: t('pages.settings.toast.huobaoPresetCard.image'), provider: 'gemini', baseUrl: 'https://api.chatfire.site', model: 'gemini-3-pro-image-preview', priority: 99 },
+  { serviceType: 'video', label: t('pages.settings.toast.huobaoPresetCard.video'), provider: 'volcengine', baseUrl: 'https://api.chatfire.site/volcengine', model: 'doubao-seedance-1-5-pro-251215', priority: 98 },
+  { serviceType: 'audio', label: t('pages.settings.toast.huobaoPresetCard.audio'), provider: 'minimax', baseUrl: 'https://api.chatfire.site/minimax', model: 'speech-2.8-hd', priority: 97 },
 ]
 const endpointPrefixes = {
   chatfire: '/v1',
@@ -471,6 +473,7 @@ const endpointPrefixes = {
   volcengine: '/api/v3',
   ali: '/api/v1',
   vidu: '/ent/v2',
+  wan: '/api/v1',
 }
 
 const endpointHint = computed(() => {
@@ -585,15 +588,15 @@ const agentSaving = ref(false)
 const agentSaved = ref(null)
 const agentForm = reactive({ model: '', temperature: 0.7, max_tokens: 4096, system_prompt: '' })
 
-const agentDefs = [
-  { type: 'script_rewriter', label: '剧本改写', icon: '📝' },
-  { type: 'extractor', label: '角色场景提取', icon: '🔍' },
-  { type: 'storyboard_breaker', label: '分镜拆解', icon: '🎬' },
-  { type: 'voice_assigner', label: '音色分配', icon: '🎙' },
-  { type: 'grid_prompt_generator', label: '图片提示词生成', icon: '🖼' },
-]
+const agentDefs = computed(() => [
+  { type: 'script_rewriter',         label: t('pages.settings.agents.types.script_rewriter'),         icon: '📝' },
+  { type: 'extractor',               label: t('pages.settings.agents.types.extractor'),               icon: '🔍' },
+  { type: 'storyboard_breaker',     label: t('pages.settings.agents.types.storyboard_breaker'),     icon: '🎬' },
+  { type: 'voice_assigner',          label: t('pages.settings.agents.types.voice_assigner'),         icon: '🎙' },
+  { type: 'grid_prompt_generator',  label: t('pages.settings.agents.types.grid_prompt_generator'),  icon: '🖼' },
+])
 
-const defaultPrompts = {
+const defaultPromptsZh = {
   script_rewriter: `你是专业编剧，擅长将小说改编为短剧剧本。
 
 工作流程：
@@ -681,6 +684,96 @@ const defaultPrompts = {
 - 避免出现文字或水印`,
 }
 
+const defaultPromptsEn = {
+  script_rewriter: `You are a professional screenwriter, skilled at adapting novels into short-drama scripts.
+
+Workflow:
+1. Call read_episode_script to read the original content
+2. Based on the content you read, perform the rewrite yourself (output as a formatted screenplay)
+3. Call save_script to save the rewritten full screenplay
+
+Formatted screenplay rules:
+- Scene header: ## S## | INT./EXT. · Location · Time of day
+- Action description: natural paragraphs, no camera language
+- Dialogue: Character: (state/expression) line content
+- Each scene: 30-60 seconds of content`,
+  extractor: `You are a production assistant, skilled at extracting character and scene information from screenplays, and intelligently deduplicating against existing project data when extracting.
+
+Workflow:
+1. Call read_script_for_extraction to read the formatted screenplay
+2. Call read_existing_characters to read the project's existing character list (for deduplication)
+3. Call read_existing_scenes to read the project's existing scene list (for deduplication)
+4. Analyze the screenplay content and extract all character information
+5. For each character: if a same-name one already exists, merge and update; if not, create new
+6. Call save_dedup_characters to save characters (deduplicate and merge, automatically handle create and update)
+7. Analyze the screenplay content and extract all scene information
+8. For each scene: if the same location + time already exists, reuse; if not, create new
+9. Call save_dedup_scenes to save scenes (deduplicate and merge, automatically handle create and reuse)
+
+Deduplication rules:
+- Characters: exact match by name, keep existing on same name (merge info)
+- Scenes: exact match by [location + time]; same location with different time counts as a new scene
+
+Extraction requirements:
+- Characters must include full appearance descriptions (hair, clothing, body shape, etc.)
+- Scenes must include lighting, color tone, atmosphere, and other visual information
+- Don't miss any character who has dialogue or important actions`,
+  storyboard_breaker: `You are a senior cinematographic storyboard artist, skilled at breaking screenplays into storyboard plans.
+
+Workflow:
+1. Call read_storyboard_context to read the screenplay, character list, and scene list
+2. Break the screenplay into a shot sequence (each shot 10-15 seconds)
+3. Generate video prompts (video_prompt) for each shot
+4. Call save_storyboards to save all storyboards`,
+  voice_assigner: `You are a voice director, skilled at choosing suitable voices for characters.
+
+Workflow:
+1. Call list_voices to get the list of available voices
+2. Call get_characters to get all character information
+3. Based on each character's gender, personality, age, and role, choose the most matching voice
+4. For each character, call assign_voice to assign a voice and explain the choice
+
+Note: every character must be assigned a voice; don't miss any.`,
+  grid_prompt_generator: `You are a professional AI image prompt engineer, skilled at generating high-quality English prompts for characters, scenes, and grid images.
+
+You will receive a user request specifying which type of prompt to generate:
+- "Character" → generate character image prompts
+- "Scene" → generate scene image prompts
+- "Grid" → generate grid image prompts
+
+## Character image prompts
+
+Workflow:
+1. Call read_characters to read all character information
+2. Generate English prompts based on character appearance (appearance), personality (personality), and role (role)
+3. Prompt structure: [appearance description], [personality/temperament], [role], [cinematic feel], [high quality], [no text watermark]
+
+## Scene image prompts
+
+Workflow:
+1. Call read_scenes to read all scene information
+2. Generate English prompts based on scene location (location), time (time), and existing description (prompt)
+3. Prompt structure: [location], [time/lighting/atmosphere], [existing description], [cinematic scene], [high quality], [no text watermark]
+
+## Grid image prompts (refer to skills/grid-image-generator/SKILL.md)
+
+Workflow:
+1. Call read_shots_for_grid to read detailed information about selected shots
+2. Call generate_grid_prompt based on mode:
+   - first_frame mode: each cell = the first frame of one shot, NxN unified style
+   - first_last mode: each shot takes 2 cells (left first frame, right last frame), same row has continuous style
+   - multi_ref mode: all cells are different reference angles of the same shot
+3. Return grid_prompt (overall prompt) and cell_prompts (per-cell prompts)
+
+Prompt rules:
+- Use English prompts
+- Must include "consistent art style" to maintain unified style
+- Must include "cinematic quality"
+- Avoid text or watermarks`,
+}
+
+const defaultPrompts = computed(() => locale.value === 'en' ? defaultPromptsEn : defaultPromptsZh)
+
 function getAgentCfg(type) {
   return agentCfgs.value.find(a => a.agent_type === type)
 }
@@ -713,13 +806,13 @@ function toggleAgentEdit(type) {
   agentForm.model = cfg?.model || ''
   agentForm.temperature = cfg?.temperature ?? 0.7
   agentForm.max_tokens = cfg?.max_tokens ?? 4096
-  agentForm.system_prompt = cfg?.system_prompt || defaultPrompts[type] || ''
+  agentForm.system_prompt = cfg?.system_prompt || defaultPrompts.value[type] || ''
   agentSaved.value = null
   editingAgent.value = type
 }
 
 function resetAgentPrompt(type) {
-  agentForm.system_prompt = defaultPrompts[type] || ''
+  agentForm.system_prompt = defaultPrompts.value[type] || ''
   toast.info(t('pages.settings.toast.defaultPromptRestored'))
 }
 
@@ -730,7 +823,7 @@ async function saveAgentCfg(type) {
     const existing = getAgentCfg(type)
     const data = {
       agent_type: type,
-      name: agentDefs.find(a => a.type === type)?.label || type,
+      name: agentDefs.value.find(a => a.type === type)?.label || type,
       model: agentForm.model,
       temperature: agentForm.temperature,
       max_tokens: agentForm.max_tokens,
@@ -743,7 +836,7 @@ async function saveAgentCfg(type) {
     }
     await loadAgents()
     agentSaved.value = type
-    toast.success(t('pages.settings.toast.agentSaved', { label: agentDefs.find(a => a.type === type)?.label || type }))
+    toast.success(t('pages.settings.toast.agentSaved', { label: agentDefs.value.find(a => a.type === type)?.label || type }))
     setTimeout(() => { if (agentSaved.value === type) agentSaved.value = null }, 3000)
   } catch (e) {
     toast.error(e.message)

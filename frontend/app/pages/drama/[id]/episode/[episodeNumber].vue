@@ -2451,7 +2451,7 @@ async function refresh() {
 
 function saveRaw() { episodeAPI.update(epId.value, { content: localRaw.value }); episode.value.content = localRaw.value }
 function saveScr() { episodeAPI.update(epId.value, { script_content: localScript.value }); episode.value.script_content = localScript.value }
-function doRewrite() { saveRaw(); runAgent('script_rewriter', '请读取剧本并改写为格式化剧本，然后保存', dramaId, epId.value, refresh) }
+function doRewrite() { saveRaw(); runAgent('script_rewriter', t('pages.drama.episode.toast.agentPrompts.rewrite'), dramaId, epId.value, refresh) }
 function skipRewrite() {
   const raw = (localRaw.value || rawContent.value || '').trim()
   if (!raw) {
@@ -2463,8 +2463,8 @@ function skipRewrite() {
   toast.success(t('pages.drama.episode.toast.skippedRewrite'))
   scriptStep.value = 2
 }
-function doExtract() { saveScr(); runAgent('extractor', '请从剧本中提取所有角色和场景信息，提取时自动与项目已有数据进行去重合并', dramaId, epId.value, refresh) }
-function doVoice() { runAgent('voice_assigner', '请为所有角色分配合适的音色', dramaId, epId.value, refresh) }
+function doExtract() { saveScr(); runAgent('extractor', t('pages.drama.episode.toast.agentPrompts.extract'), dramaId, epId.value, refresh) }
+function doVoice() { runAgent('voice_assigner', t('pages.drama.episode.toast.agentPrompts.voice'), dramaId, epId.value, refresh) }
 async function batchGenSamples() {
   const pending = chars.value.filter(c => (c.voice_style || c.voiceStyle) && !(c.voice_sample_url || c.voiceSampleUrl))
   if (!pending.length) {
@@ -2480,11 +2480,20 @@ async function batchGenSamples() {
 }
 function doBreakdown() {
   const cfg = videoConfigs.value.find(c => c.id === lockedVideoConfigId.value)
-  const label = cfg ? `${cfg.name} (${cfg.provider})` : '默认'
-  runAgent('storyboard_breaker', `请拆解分镜并生成视频提示词。视频模型：${label}，请根据该模型的特性和时长限制生成合适的视频提示词。`, dramaId, epId.value, refresh)
+  const label = cfg ? `${cfg.name} (${cfg.provider})` : t('pages.drama.episode.toast.agentPrompts.defaultVideo')
+  runAgent('storyboard_breaker', t('pages.drama.episode.toast.agentPrompts.breakdown', { label }), dramaId, epId.value, refresh)
 }
 async function genSample(id) { try { await characterAPI.voiceSample(id, epId.value); toast.success(t('pages.drama.episode.toast.voiceSampleOne')); refresh() } catch (e) { toast.error(e.message) } }
-async function addShot() { await storyboardAPI.create({ episode_id: epId.value, storyboard_number: sbs.value.length + 1, title: `镜头${sbs.value.length + 1}`, duration: 10 }); refresh() }
+async function addShot() {
+  const n = sbs.value.length + 1
+  await storyboardAPI.create({
+    episode_id: epId.value,
+    storyboard_number: n,
+    title: t('pages.drama.episode.toast.agentPrompts.defaultShotTitle', { n }),
+    duration: 10,
+  })
+  refresh()
+}
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))

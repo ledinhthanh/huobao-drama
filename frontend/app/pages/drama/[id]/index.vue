@@ -221,6 +221,7 @@ async function addEpisode() {
       image_config_id: newEpisodeImageConfigId.value,
       video_config_id: newEpisodeVideoConfigId.value,
       audio_config_id: newEpisodeAudioConfigId.value,
+      language: locale.value,
     })
     toast.success(t('pages.drama.added'))
     addDialog.value = false

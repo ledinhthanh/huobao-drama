@@ -433,6 +433,14 @@
           "allVoiceSamplesReady": "All character voice previews are ready",
           "voiceSampleOne": "Voice sample generated",
           "assignVoicesFirst": "Please assign voices first",
+          "agentPrompts": {
+            "rewrite": "Please read the script and rewrite it as a formatted screenplay, then save it.",
+            "extract": "Please extract all character and scene information from the screenplay. Auto-deduplicate against existing project data when extracting.",
+            "voice": "Please assign a suitable voice to each character.",
+            "breakdown": "Please break down the storyboards and generate video prompts. Video model: {label}. Generate video prompts suitable for the model's capabilities and duration limits.",
+            "defaultVideo": "default",
+            "defaultShotTitle": "Shot {n}"
+          },
           "characterImageGenerating": "Character image generating",
           "characterImagesBatchGenerating": "Batch character images generating",
           "allCharacterImagesReady": "All character images are ready",
@@ -592,6 +600,25 @@
       },
       "toast": {
         "endpointReachable": "Endpoint responded",
+        "providerPreset": {
+          "chatfire": "ChatFire Recommended",
+          "openrouter": "OpenRouter Recommended",
+          "openai": "OpenAI Recommended",
+          "gemini": "Gemini Recommended",
+          "volcengine": "Volcengine Recommended",
+          "vidu": "Vidu Recommended",
+          "ali": "Alibaba DashScope Recommended",
+          "minimax": "Huobao Audio",
+          "wan": "Wan 2.2 Self-hosted",
+          "huobaoVideo": "Huobao Video",
+          "huobaoAudio": "Huobao Audio"
+        },
+        "huobaoPresetCard": {
+          "text": "Text",
+          "image": "Image",
+          "video": "Video",
+          "audio": "Audio"
+        },
         "endpointFailed": "Endpoint failed test",
         "selectProvider": "Select a provider",
         "deleted": "Deleted",
