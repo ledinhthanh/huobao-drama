@@ -21,10 +21,14 @@ app.post('/', async (c) => {
     .orderBy(schema.episodes.episodeNumber).all()
   const nextNum = existing.length ? Math.max(...existing.map(e => e.episodeNumber)) + 1 : 1
 
+  // Auto-generated default title — localized by client `language` field
+  const lang = body.language === 'en' ? 'en' : 'zh'
+  const defaultTitle = lang === 'en' ? `Episode ${nextNum}` : `第${nextNum}集`
+
   const res = db.insert(schema.episodes).values({
     dramaId: body.drama_id,
     episodeNumber: nextNum,
-    title: body.title || `第${nextNum}集`,
+    title: body.title || defaultTitle,
     imageConfigId: body.image_config_id,
     videoConfigId: body.video_config_id,
     audioConfigId: body.audio_config_id,

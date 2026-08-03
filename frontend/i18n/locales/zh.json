@@ -433,6 +433,14 @@
           "allVoiceSamplesReady": "所有角色的试听文件已生成",
           "voiceSampleOne": "试听已生成",
           "assignVoicesFirst": "请先分配音色",
+          "agentPrompts": {
+            "rewrite": "请读取剧本并改写为格式化剧本，然后保存",
+            "extract": "请从剧本中提取所有角色和场景信息，提取时自动与项目已有数据进行去重合并",
+            "voice": "请为所有角色分配合适的音色",
+            "breakdown": "请拆解分镜并生成视频提示词。视频模型：{label}，请根据该模型的特性和时长限制生成合适的视频提示词。",
+            "defaultVideo": "默认",
+            "defaultShotTitle": "镜头{n}"
+          },
           "characterImageGenerating": "角色图片生成中",
           "characterImagesBatchGenerating": "角色图片批量生成中",
           "allCharacterImagesReady": "所有角色图片已生成",
@@ -592,6 +600,25 @@
       },
       "toast": {
         "endpointReachable": "端点已响应",
+        "providerPreset": {
+          "chatfire": "ChatFire 推荐",
+          "openrouter": "OpenRouter 推荐",
+          "openai": "OpenAI 推荐",
+          "gemini": "Gemini 推荐",
+          "volcengine": "火山推荐",
+          "vidu": "Vidu 推荐",
+          "ali": "阿里推荐",
+          "minimax": "火宝音频",
+          "wan": "Wan 2.2 自部署",
+          "huobaoVideo": "火宝视频",
+          "huobaoAudio": "火宝音频"
+        },
+        "huobaoPresetCard": {
+          "text": "文本",
+          "image": "图片",
+          "video": "视频",
+          "audio": "音频"
+        },
         "endpointFailed": "端点未通过测试",
         "selectProvider": "选择服务商",
         "deleted": "已删除",

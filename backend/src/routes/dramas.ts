@@ -69,11 +69,13 @@ app.post('/', async (c) => {
 
   // Create default episodes
   const totalEpisodes = body.total_episodes || 1
+  const lang = body.language === 'en' ? 'en' : 'zh'
   for (let i = 1; i <= totalEpisodes; i++) {
+    const defaultTitle = lang === 'en' ? `Episode ${i}` : `第${i}集`
     db.insert(schema.episodes).values({
       dramaId: result.id,
       episodeNumber: i,
-      title: `第${i}集`,
+      title: defaultTitle,
       status: 'draft',
       createdAt: ts,
       updatedAt: ts,
