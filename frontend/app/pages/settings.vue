@@ -497,7 +497,7 @@ function applyProviderPreset(type, provider) {
   cfgForm.provider = provider
   cfgForm.base_url = preset.baseUrl
   cfgForm.modelStr = preset.models.join(', ')
-  cfgForm.name = `${preset.label}-${serviceMeta[type].label}`
+  cfgForm.name = `${preset.label}-${serviceMeta.value[type].label}`
 }
 
 async function loadCfgs() { try { cfgs.value = await aiConfigAPI.list() } catch (e) { toast.error(e.message) } }
