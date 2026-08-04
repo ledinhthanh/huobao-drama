@@ -216,10 +216,24 @@ async function pollVideoTask(id: number, config: AIConfig, taskId: string, story
 
       const pollResp = adapter.parsePollResponse(result)
 
-      if (pollResp.status === 'completed' && pollResp.videoUrl) {
-        logTaskSuccess('VideoTask', 'poll-complete', { id, taskId, videoUrl: pollResp.videoUrl })
-        await handleVideoComplete(id, pollResp.videoUrl, null, storyboardId)
-        return
+      if (pollResp.status === 'completed') {
+        // For fal.ai, video URL is in the result endpoint, not status endpoint
+        let videoUrl = pollResp.videoUrl
+        if (!videoUrl && 'buildResultRequest' in adapter) {
+          const resultReq = (adapter as any).buildResultRequest(config, taskId)
+          logTaskProgress('VideoTask', 'fetch-result', { id, taskId, url: redactUrl(resultReq.url) })
+          const resultResp = await fetch(resultReq.url, { method: resultReq.method, headers: resultReq.headers })
+          if (resultResp.ok) {
+            const resultData = await resultResp.json() as any
+            const resultRespParsed = (adapter as any).parseResultResponse(resultData)
+            videoUrl = resultRespParsed.videoUrl
+          }
+        }
+        if (videoUrl) {
+          logTaskSuccess('VideoTask', 'poll-complete', { id, taskId, videoUrl })
+          await handleVideoComplete(id, videoUrl, null, storyboardId)
+          return
+        }
       }
       if (pollResp.status === 'failed') {
         logTaskError('VideoTask', 'poll-failed', { id, taskId, error: pollResp.error || 'Video generation failed' })
